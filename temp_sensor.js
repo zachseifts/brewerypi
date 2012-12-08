@@ -24,7 +24,14 @@ function checkTemp() {
       var data = {
         'timestamp': now,
         'temp_c': temp,
-        'host': os.hostname()};
+        'host': {
+          'hostname': os.hostname(),
+          'type': os.type(),
+          'arch': os.arch(),
+          'totalmem': os.totalmem(),
+          'freemem': os.freemem(),
+        },
+      };
       console.log(data);
     });
   }
