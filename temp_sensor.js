@@ -32,7 +32,6 @@ function checkTemp() {
         host: 'localhost',
         database: 'brewery',
         user: 'root',
-        port: '8889',
         password: 'root'
       });
       conn.connect();
