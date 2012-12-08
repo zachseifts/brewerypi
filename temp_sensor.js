@@ -21,7 +21,10 @@ function checkTemp() {
       var now = Date.now();
       // Should replace with a regular expression
       var temp = parseFloat(stdout.replace('temp=', '').replace("'C", '').trim());
-      var data = [now, temp, os.hostname()];
+      var data = {
+        'timestamp': now,
+        'temp_c': temp,
+        'host': os.hostname()};
       console.log(data);
     });
   }
