@@ -48,6 +48,7 @@ function checkTemp() {
     });
   }
 
+  console.log('Starting temp sensor');
   checkTemperature();
   // Run checkTemperature() every 60 seconds
   setInterval(checkTemperature, 1000 * 60);
