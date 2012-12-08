@@ -27,7 +27,7 @@ function checkTemp() {
   }
 
   // Run checkTemperature() every 60 seconds
-  setInterval(checkTemperature, 1000 * 6);
+  setInterval(checkTemperature, 1000 * 60);
 }
 
 exports.checkTemp = checkTemp;
