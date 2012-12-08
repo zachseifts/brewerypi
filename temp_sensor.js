@@ -27,6 +27,7 @@ function checkTemp() {
         'host': os.hostname()
       };
 
+      // Connect to the mysql server
       var conn = mysql.createConnection({
         host: 'localhost',
         database: 'brewery',
@@ -35,13 +36,15 @@ function checkTemp() {
         password: 'root'
       });
       conn.connect();
+
+      // Create the record
       var query = conn.query('INSERT INTO temps SET ?', data, function(err, result) {
         if (err) {
           console.log('error!' + err);
         };
       });
-      console.log(query.sql);
-      console.log(data);
+
+      // Close the connection
       conn.end();
     });
   }
