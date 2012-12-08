@@ -18,7 +18,7 @@ function checkTemp() {
    */
   function checkTemperature() {
     // Run the command and publish the output
-    exec(command, function puts(error, stdout, stderr) {
+    exec(command, function(error, stdout, stderr) {
       var now = Math.round(Date.now() / 1000);
       // Should replace with a regular expression
       var temp = parseFloat(stdout.replace('temp=', '').replace("'C", '').trim());
