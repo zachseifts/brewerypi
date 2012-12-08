@@ -4,6 +4,7 @@
 
 var os = require('os')
 var exec = require('child_process').exec;
+var mysql = require('mysql');
 
 /**
  * A temperature checker
@@ -22,17 +23,26 @@ function checkTemp() {
       // Should replace with a regular expression
       var temp = parseFloat(stdout.replace('temp=', '').replace("'C", '').trim());
       var data = {
-        'timestamp': now,
-        'temp_c': temp,
-        'host': {
-          'hostname': os.hostname(),
-          'type': os.type(),
-          'arch': os.arch(),
-          'totalmem': os.totalmem(),
-          'freemem': os.freemem(),
-        },
+        'temp': temp,
+        'host': os.hostname()
       };
+
+      var conn = mysql.createConnection({
+        host: 'localhost',
+        database: 'brewery',
+        user: 'root',
+        port: '8889',
+        password: 'root'
+      });
+      conn.connect();
+      var query = conn.query('INSERT INTO temps SET ?', data, function(err, result) {
+        if (err) {
+          console.log('error!' + err);
+        };
+      });
+      console.log(query.sql);
       console.log(data);
+      conn.end();
     });
   }
 
