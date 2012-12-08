@@ -11,5 +11,5 @@ A node.js powered brewery monitoring application
 
 Create the mysql tables:
 
-    CREATE TABLE temps (timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, temp FLOAT, host VARCHAR(128));
+    CREATE TABLE temps (timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, temp FLOAT, hostname VARCHAR(128));
 

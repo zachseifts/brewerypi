@@ -24,7 +24,7 @@ function checkTemp() {
       var temp = parseFloat(stdout.replace('temp=', '').replace("'C", '').trim());
       var data = {
         'temp': temp,
-        'host': os.hostname()
+        'hostname': os.hostname()
       };
 
       // Connect to the mysql server
