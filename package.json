@@ -1,0 +1,7 @@
+{
+  "name": "brewery",
+  "description": "A package for monitoring brewing beer",
+  "author": "Zach Seifts <zach.seifts@gmail.com>",
+  "version": "0.1.0",
+  "engine": "node 0.4.1"
+}
