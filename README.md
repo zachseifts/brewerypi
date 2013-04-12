@@ -1,15 +1,14 @@
-# NodeBrewery
+# Brewery
 
-A node.js powered brewery monitoring application
+A temperature logger based on a raspberry pi and a temperature sensor.
 
 ## Requirements
 
- - mysql
- - node.js
+ - Python
+ - Raspberry pi
+ - DS18B20 Digital temperature sensor
 
-## Setup
+## Usage
 
-Create the mysql tables:
-
-    CREATE TABLE temps (timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, temp FLOAT, hostname VARCHAR(128));
+    ./app.py -p /path/to/the/device -d /path/to/database.sqlite
 
