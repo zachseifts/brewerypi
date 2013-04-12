@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 import sqlite3
 import re
 import socket
@@ -66,7 +65,6 @@ class TempSensorReader(object):
             con.commit();
         except sqlite3.Error, e:
             raise BadSqlite3, e
-            sys.exit(1)
         finally:
             if con:
                 con.close()
