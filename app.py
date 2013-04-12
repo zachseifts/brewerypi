@@ -44,7 +44,7 @@ class TempSensorReader(object):
         if not re.search('YES', data[0]):
             raise BadTemperatureReading, 'Invalid data from sensor'
         
-        self.temp_raw = int(data[1].split('t=')[1].strip())
+        self.temp_raw = int(re.search(r"t=\d+", data[1]).group(0).lstrip('t='))
 
     def write_record(self):
         ''' Writes the temperature the a sqlite database.
