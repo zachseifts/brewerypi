@@ -41,7 +41,7 @@ class TempSensorReader(object):
 
         data = out.decode('utf-8').split('\n')
 
-        if not re.search('YES', data[0]):
+        if not re.search(r'YES', data[0]):
             raise BadTemperatureReading, 'Invalid data from sensor'
         
         self.temp_raw = int(re.search(r"t=\d+", data[1]).group(0).lstrip('t='))
