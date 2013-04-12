@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import sqlite3
-import re
-import socket
-import subprocess
+from re import search
+from socket import gethostbyname, gethostname
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from textwrap import dedent
+from subprocess import Popen, PIPE
+from sqlite3 import connect
+from sqlite3 import Error as Sqlite3Error
 
 class BadTemperatureReading(Exception): pass
 class BadSqlite3(Exception): pass
@@ -21,17 +22,17 @@ class TempSensorReader(object):
     def __init__(self, **kwargs):
         self.device_file = kwargs.get('path', '')
         self.database = kwargs.get('database', '')
-        self.ip = socket.gethostbyname(socket.gethostname())
+        self.ip = gethostbyname(gethostname())
         self.read_temp()
         self.write_record()
 
     def read_temp(self):
         ''' Converts the raw data to a human redable format.
         '''
-        catdata = subprocess.Popen(
+        catdata = Popen(
             ['cat', self.device_file],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stdout=PIPE,
+            stderr=PIPE
         )
         out, err = catdata.communicate()
 
@@ -40,17 +41,17 @@ class TempSensorReader(object):
 
         data = out.decode('utf-8').split('\n')
 
-        if not re.search(r'YES', data[0]):
+        if not search(r'YES', data[0]):
             raise BadTemperatureReading, 'Invalid data from sensor'
         
-        self.temp_raw = int(re.search(r't=\d+', data[1]).group(0).lstrip('t='))
+        self.temp_raw = int(search(r't=\d+', data[1]).group(0).lstrip('t='))
 
     def write_record(self):
         ''' Writes the temperature the a sqlite database.
         '''
         con = '';
         try:
-            con = sqlite3.connect(self.database)
+            con = connect(self.database)
             cur = con.cursor()
             create_sql = '''
             CREATE TABLE IF NOT EXISTS brewery
@@ -63,7 +64,7 @@ class TempSensorReader(object):
             cur.execute(create_sql)
             cur.execute("INSERT INTO brewery(temp,ip) VALUES (?,?)", (self.temp_raw, self.ip))
             con.commit();
-        except sqlite3.Error, e:
+        except Sqlite3Error, e:
             raise BadSqlite3, e
         finally:
             if con:
