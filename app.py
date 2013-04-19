@@ -5,8 +5,6 @@ from socket import gethostbyname, gethostname
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from textwrap import dedent
 from subprocess import Popen, PIPE
-from sqlite3 import connect
-from sqlite3 import Error as Sqlite3Error
 
 class BadTemperatureReading(Exception): pass
 class BadSqlite3(Exception): pass
@@ -21,10 +19,12 @@ class TempSensorReader(object):
 
     def __init__(self, **kwargs):
         self.device_file = kwargs.get('path', '')
-        self.database = kwargs.get('database', '')
+        self.server = kwargs.get('server', '')
+        self.creds = kwargs.get('creds', '')
+        self.key = kwargs.get('key', '')
         self.ip = gethostbyname(gethostname())
         self.read_temp()
-        self.write_record()
+        self.post_record()
 
     def read_temp(self):
         ''' Converts the raw data to a human redable format.
@@ -46,30 +46,15 @@ class TempSensorReader(object):
         
         self.temp_raw = int(search(r't=\d+', data[1]).group(0).lstrip('t='))
 
-    def write_record(self):
-        ''' Writes the temperature the a sqlite database.
+    def post_record(self):
+        ''' Posts the record to the api.
         '''
-        con = '';
-        try:
-            con = connect(self.database)
-            cur = con.cursor()
-            create_sql = '''
-            CREATE TABLE IF NOT EXISTS brewery
-              (id INTEGER PRIMARY KEY AUTOINCREMENT,
-               created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-               temp INTEGER NOT NULL,
-               ip TEXT NOT NULL
-              )
-            '''
-            cur.execute(create_sql)
-            cur.execute("INSERT INTO brewery(temp,ip) VALUES (?,?)", (self.temp_raw, self.ip))
-            con.commit();
-        except Sqlite3Error, e:
-            raise BadSqlite3, e
-        finally:
-            if con:
-                con.close()
-
+        request = Popen(
+            ['curl',
+             '-X', 'POST',
+             '--user', self.creds,
+             '%s/%s/%d' % (self.server, self.key, self.temp_raw)])
+        out, err = request.communicate()
 
 if __name__ == '__main__':
     description = dedent('''\
@@ -77,10 +62,17 @@ if __name__ == '__main__':
     ''')
     parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
         description=description)
-    parser.add_argument('-p', '--path', type=str, metavar='/path/to/device/',
+    parser.add_argument('-d', '--device', type=str, metavar='/path/to/device/',
         help=u'The file system path to the device')
-    parser.add_argument('-d', '--database', type=str, metavar='/path/to/database.sqlite',
-        help=u'The file system path to the database')
+    parser.add_argument('-s', '--server', type=str, metavar='http://rest.api.su/temps/',
+        help=u'The url for the rest server')
+    parser.add_argument('-c', '--creds', type=str, metavar='username:password',
+        help=u'The credentials for the rest api')
+    parser.add_argument('-k', '--key', type=str, metavar='key',
+        help=u'The unique identifier for this device')
     args = parser.parse_args()
-    main = TempSensorReader(path=args.path, database=args.database)
+    main = TempSensorReader(path=args.device,
+                            server=args.server,
+                            creds=args.creds,
+                            key=args.key)
 
