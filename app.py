@@ -53,8 +53,9 @@ class TempSensorReader(object):
             ['curl',
              '-X', 'POST',
              '--user', self.creds,
-             '%s/%s/%d' % (self.server, self.key, self.temp_raw)])
-        out, err = request.communicate()
+             '%s/%s/%d' % (self.server, self.key, self.temp_raw)],
+            stdout=PIPE,
+            stderr=PIPE)
 
 if __name__ == '__main__':
     description = dedent('''\
