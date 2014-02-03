@@ -6,6 +6,9 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from textwrap import dedent
 from subprocess import Popen, PIPE
 
+from requests import session as Session
+from json import dumps
+
 class BadTemperatureReading(Exception): pass
 class BadSqlite3(Exception): pass
 
@@ -20,7 +23,8 @@ class TempSensorReader(object):
     def __init__(self, **kwargs):
         self.device_file = kwargs.get('path', '')
         self.server = kwargs.get('server', '')
-        self.creds = kwargs.get('creds', '')
+        self.username = kwargs.get('username', '')
+        self.password = kwargs.get('password', '')
         self.key = kwargs.get('key', '')
         self.ip = gethostbyname(gethostname())
         self.read_temp()
@@ -46,16 +50,37 @@ class TempSensorReader(object):
         
         self.temp_raw = int(search(r't=\d+', data[1]).group(0).lstrip('t='))
 
+    def temp_as_f(self):
+        return ((self.temp_raw / 1000) * 1.8) + 32
+
     def post_record(self):
         ''' Posts the record to the api.
         '''
-        request = Popen(
-            ['curl',
-             '-X', 'POST',
-             '--user', self.creds,
-             '%s/%s/%d' % (self.server, self.key, self.temp_raw)],
-            stdout=PIPE,
-            stderr=PIPE)
+        
+        # Create a new session and set the headers
+        session = Session()
+        session.header.update({'Content-Type': 'application/json'})
+        session.header.update({'Accept-Type': 'application/json'})
+        
+        # Logs the user in
+        auth = {'username': self.username, 'password': self.password}
+        r = session.post('%s/reading/user/login' % self.server, data=dumps(auth))
+        
+        # Gets and sets the X-CSRF-Token header
+        token = session.get('%s/services/session/token' % self.server)
+        session.headers.update({'X-CSRF-Token': token.text})
+        
+        # Format the data and POST to the server.
+        data = {
+            'type': 'reading',
+            'title': self.key,
+            'field_reading_value': { 'und': [{'value': self.temp_as_f}]}
+        }
+        s = session.post('%s/reading/node' % self.server, data=dumps(data))
+        
+        # Log the user out
+        p = session.post('http://brewery.seifts.us/reading/user/logout')
+
 
 if __name__ == '__main__':
     description = dedent('''\
@@ -67,13 +92,16 @@ if __name__ == '__main__':
         help=u'The file system path to the device')
     parser.add_argument('-s', '--server', type=str, metavar='http://rest.api.su/temps/',
         help=u'The url for the rest server')
-    parser.add_argument('-c', '--creds', type=str, metavar='username:password',
-        help=u'The credentials for the rest api')
+    parser.add_argument('-u', '--username', type=str, metavar='username',
+        help=u'The username for the api user')
+    parser.add_argument('-p', '--password', type=str, metavar='password',
+        help=u'The password for the api user')
     parser.add_argument('-k', '--key', type=str, metavar='key',
         help=u'The unique identifier for this device')
     args = parser.parse_args()
     main = TempSensorReader(path=args.device,
                             server=args.server,
-                            creds=args.creds,
+                            username=args.username,
+                            password=args.password,
                             key=args.key)
 
