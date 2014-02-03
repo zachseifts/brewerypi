@@ -64,10 +64,10 @@ class TempSensorReader(object):
         
         # Logs the user in
         auth = {'username': self.username, 'password': self.password}
-        r = session.post('%s/reading/user/login' % self.server, data=dumps(auth))
+        r = session.post('%s/reading/user/login' % (self.server,), data=dumps(auth))
         
         # Gets and sets the X-CSRF-Token header
-        token = session.get('%s/services/session/token' % self.server)
+        token = session.get('%s/services/session/token' % (self.server,))
         session.headers.update({'X-CSRF-Token': token.text})
         
         # Format the data and POST to the server.
@@ -76,10 +76,10 @@ class TempSensorReader(object):
             'title': self.key,
             'field_reading_value': { 'und': [{'value': self.temp_as_f}]}
         }
-        s = session.post('%s/reading/node' % self.server, data=dumps(data))
+        s = session.post('%s/reading/node' % (self.server,), data=dumps(data))
         
         # Log the user out
-        p = session.post('http://brewery.seifts.us/reading/user/logout')
+        p = session.post('%s/reading/user/logout' % (self.server,))
 
 
 if __name__ == '__main__':
