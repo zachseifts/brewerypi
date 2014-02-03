@@ -50,8 +50,15 @@ class TempSensorReader(object):
         
         self.temp_raw = int(search(r't=\d+', data[1]).group(0).lstrip('t='))
 
-    def temp_as_f(self):
-        return ((self.temp_raw / 1000) * 1.8) + 32
+    def as_celsius(self):
+        ''' Returns the temperature as celsius.
+        '''
+        return self.temp_raw / 1000.0
+
+    def as_fahrenheit(self):
+        ''' Returns the temperature as fahrenheit.
+        '''
+        return (self.as_celsius() * 1.8) + 32
 
     def post_record(self):
         ''' Posts the record to the api.
@@ -74,7 +81,7 @@ class TempSensorReader(object):
         data = {
             'type': 'reading',
             'title': self.key,
-            'field_reading_value': { 'und': [{'value': self.temp_as_f}]}
+            'field_reading_value': { 'und': [{'value': self.as_fahrenheit}]}
         }
         s = session.post('%s/reading/node' % (self.server,), data=dumps(data))
         
