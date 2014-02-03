@@ -66,8 +66,8 @@ class TempSensorReader(object):
         
         # Create a new session and set the headers
         session = Session()
-        session.header.update({'Content-Type': 'application/json'})
-        session.header.update({'Accept-Type': 'application/json'})
+        session.headers.update({'Content-Type': 'application/json'})
+        session.headers.update({'Accept-Type': 'application/json'})
         
         # Logs the user in
         auth = {'username': self.username, 'password': self.password}
