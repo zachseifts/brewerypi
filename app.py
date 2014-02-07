@@ -84,7 +84,7 @@ class TempSensorReader(object):
             'title': self.key,
             'field_reading_value': { 'und': [{'value': self.as_fahrenheit()}]},
             'field_reading_category': { 'und': [{'value': 'temp', 'safe_value': 'temp'}]},
-            'field_reading_beer': { 'und': [{'target_id': self.beer}]}
+            'field_reading_beer': { 'und': self.beer}
         }
         session.post('%s/reading/node' % (self.server,), data=dumps(data), verify=False)
         
