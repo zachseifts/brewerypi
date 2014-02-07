@@ -26,6 +26,7 @@ class TempSensorReader(object):
         self.username = kwargs.get('username', '')
         self.password = kwargs.get('password', '')
         self.key = kwargs.get('key', '')
+        self.beer = kwargs.get('beer', '')
         self.ip = gethostbyname(gethostname())
         self.read_temp()
         self.post_record()
@@ -82,7 +83,8 @@ class TempSensorReader(object):
             'type': 'reading',
             'title': self.key,
             'field_reading_value': { 'und': [{'value': self.as_fahrenheit()}]},
-            'field_reading_category': { 'und': [{'value': 'temp', 'safe_value': 'temp'}]}
+            'field_reading_category': { 'und': [{'value': 'temp', 'safe_value': 'temp'}]},
+            'field_reading_beer': { 'und': [{'target_id': self.beer}]}
         }
         session.post('%s/reading/node' % (self.server,), data=dumps(data), verify=False)
         
@@ -106,10 +108,13 @@ if __name__ == '__main__':
         help=u'The password for the api user')
     parser.add_argument('-k', '--key', type=str, metavar='key',
         help=u'The unique identifier for this device')
+    parser.add_argument('-b', '--beer', type=str, metavar='BEERID',
+        help=u'A unique identifier of a beer')
     args = parser.parse_args()
     main = TempSensorReader(path=args.device,
                             server=args.server,
                             username=args.username,
                             password=args.password,
-                            key=args.key)
+                            key=args.key,
+                            beer=args.beer)
 
